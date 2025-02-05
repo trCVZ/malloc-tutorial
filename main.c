@@ -2,6 +2,15 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+typedef struct s_block* t_block;
+
+struct s_block {
+    size_t size;
+    t_block next;
+    int free;
+};
+
+
 void* dummyMalloc(size_t size) {
     void* p;
 
