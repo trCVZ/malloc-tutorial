@@ -4,7 +4,7 @@
 
 typedef struct s_block* t_block;
 
-#define align4(x) (((((x) -1) > >2) < <2)+4)
+#define align4(x) (((((x) - 1) >> 2) << 2) + 4)
 
 #define BLOCK_SIZE sizeof(struct s_block)
 
@@ -16,19 +16,6 @@ struct s_block {
     int free;
     char data[1];
 };
-
-
-
-void* dummyMalloc(size_t size) {
-    void* p;
-
-    p = sbrk(0);
-    if (sbrk(size) == (void*)-1) {
-        return NULL;
-    }
-
-    return p;
-}
 
 void split_block(t_block b, size_t s) {
     t_block new;
@@ -61,6 +48,51 @@ t_block extend_heap(t_block last, size_t s) {
     }
     b->free = 0;
     return (b);
+}
+
+void* dummyMalloc(size_t size) {
+    void* p;
+
+    p = sbrk(0);
+    if (sbrk(size) == (void*)-1) {
+        return NULL;
+    }
+
+    return p;
+}
+
+void* malloc(size_t size) {
+    t_block b, last;
+    size_t s;
+    s = align4(size);
+    if (base) {
+        // First find a block
+        last = base;
+        b = find_block(&last, s);
+        if (b) {
+            // Can we split
+            if ((b->size - s) >= (BLOCK_SIZE + 4)) {
+                slit_block(b, s);
+            }
+            b->free = 0;
+        }
+        else {
+            // No fitting block, extend the heap
+            b = extend_heap(last, s);
+            if (!b) {
+                return (NULL);
+            }
+        }
+    }
+    else {
+        // First use of malloc
+        b = extend_heap(NULL, s);
+        if (!b) {
+            return (NULL);
+        }
+        base = b;
+    }
+    return (b->data);
 }
 
 int main() {
