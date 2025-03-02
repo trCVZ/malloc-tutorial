@@ -19,19 +19,20 @@ struct s_block {
 
 void split_block(t_block b, size_t s) {
     t_block new;
-    new = b->data + s;
+    new = (t_block)(b->data + s);
     new->size = b->size - s - BLOCK_SIZE;
     new->next = b->next;
     new->free = 1;
     b->size = s;
     b->next = new;
+    return NULL;
 }
 
 t_block find_block(t_block* last, size_t size) {
     t_block b = base;
     while (b && !(b->free && b->size >= size)) {
         *last = b;
-        b = b
+        b = b->next;
     }
 }
 
@@ -61,7 +62,7 @@ void* dummyMalloc(size_t size) {
     return p;
 }
 
-void* malloc(size_t size) {
+void* true_malloc(size_t size) {
     t_block b, last;
     size_t s;
     s = align4(size);
@@ -72,7 +73,7 @@ void* malloc(size_t size) {
         if (b) {
             // Can we split
             if ((b->size - s) >= (BLOCK_SIZE + 4)) {
-                slit_block(b, s);
+                split_block(b, s);
             }
             b->free = 0;
         }
@@ -99,7 +100,7 @@ int main() {
     int* arr;
     size_t n = 10;
 
-    arr = (int*)dummyMalloc(n * sizeof(int));
+    arr = true_malloc(n * sizeof(int));
     if (arr == NULL) {
         printf("Memory allocation failed\n");
         return 1;
