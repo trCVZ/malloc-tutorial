@@ -4,11 +4,17 @@
 
 typedef struct s_block* t_block;
 
+#define align4(x) (((((x) -1) > >2) < <2)+4)
+
+#define BLOCK_SIZE sizeof(struct s_block)
+
 struct s_block {
     size_t size;
     t_block next;
     int free;
+    char data[1];
 };
+
 
 
 void* dummyMalloc(size_t size) {
@@ -20,6 +26,29 @@ void* dummyMalloc(size_t size) {
     }
 
     return p;
+}
+
+t_block find_block(t_block* last, size_t size) {
+    t_block b = base;
+    while (b && !(b->free && b->size >= size)) {
+        *last = b;
+        b = b
+    }
+}
+
+t_block extend_heap(t_block last, size_t s) {
+    t_block b;
+    b = sbrk(0);
+    if (sbrk(BLOCK_SIZE + s) == (void*)-1) {
+        return NULL;
+    }
+    b->size = s;
+    b->next = NULL;
+    if (last) {
+        last->next = b;
+    }
+    b->free = 0;
+    return (b);
 }
 
 int main() {
