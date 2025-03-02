@@ -8,6 +8,8 @@ typedef struct s_block* t_block;
 
 #define BLOCK_SIZE sizeof(struct s_block)
 
+void* base = NULL;
+
 struct s_block {
     size_t size;
     t_block next;
@@ -26,6 +28,16 @@ void* dummyMalloc(size_t size) {
     }
 
     return p;
+}
+
+void split_block(t_block b, size_t s) {
+    t_block new;
+    new = b->data + s;
+    new->size = b->size - s - BLOCK_SIZE;
+    new->next = b->next;
+    new->free = 1;
+    b->size = s;
+    b->next = new;
 }
 
 t_block find_block(t_block* last, size_t size) {
