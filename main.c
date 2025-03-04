@@ -13,6 +13,7 @@ void* base = NULL;
 struct s_block {
     size_t size;
     t_block next;
+    t_block prev;
     int free;
     char data[1];
 };
@@ -109,6 +110,17 @@ void* calloc(size_t number, size_t size) {
     return (new);
 }
 
+t_block fusion(t_block b) {
+    if (b->next && b->next->free) {
+        b->size += BLOCK_SIZE + b->next->size;
+        b->next = b->next->next;
+        if (b->next) {
+            b->next->prev = b;
+        }
+    }
+    return (b);
+}
+
 int main() {
     int* arr;
     size_t n = 10;
@@ -127,6 +139,25 @@ int main() {
         printf("%d ", arr[i]);
     }
     printf("\n");
+
+    // Using calloc
+    int* arr_calloc = calloc(n, sizeof(int));
+    if (arr_calloc == NULL) {
+        printf("Calloc failed\n");
+        return 1;
+    }
+
+    for (size_t i = 0; i < n; i++) {
+        printf("%d ", arr_calloc[i]);
+    }
+    printf("\n");
+
+    // Freeing memory (dummy implementation)
+    // Normally, you would implement a free function to handle this
+    // Here we just demonstrate the fusion function
+    t_block block = (t_block)((char*)arr - sizeof(struct s_block));
+    block->free = 1;
+    fusion(block);
 
     return 0;
 }
