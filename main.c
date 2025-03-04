@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include "malloc_tutorial.h"
 
 typedef struct s_block* t_block;
 
