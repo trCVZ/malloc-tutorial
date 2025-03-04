@@ -15,8 +15,25 @@ struct s_block {
     t_block next;
     t_block prev;
     int free;
+    void* ptr;
     char data[1];
 };
+
+t_block get_block(void* p) {
+    char* tmp;
+    tmp = p;
+    return (p = tmp -= BLOCK_SIZE);
+}
+
+/* Valid adress for free */
+int valid_addr(void* p) {
+    if (base) {
+        if (p > base && p < sbrk(0)) {
+            return (p == (get_block(p))->ptr);
+        }
+    }
+    return (0);
+}
 
 void split_block(t_block b, size_t s) {
     t_block new;
@@ -119,6 +136,29 @@ t_block fusion(t_block b) {
         }
     }
     return (b);
+}
+
+void free(void* p) {
+    t_block b;
+    if (valid_addr(p)) {
+        b = get_block(p);
+        b->free = 1;
+        if (b->prev && b->prev->free) {
+            b = fusion(b->prev);
+        }
+        if (b->next) {
+            fusion(b);
+        }
+        else {
+            if (b->prev) {
+                b->prev->next = NULL;
+            }
+            else {
+                base = NULL;
+            }
+            brk(b);
+        }
+    }
 }
 
 int main() {
