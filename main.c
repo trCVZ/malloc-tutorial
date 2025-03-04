@@ -3,22 +3,7 @@
 #include <unistd.h>
 #include "malloc_tutorial.h"
 
-typedef struct s_block* t_block;
-
-#define align4(x) (((((x) - 1) >> 2) << 2) + 4)
-
-#define BLOCK_SIZE 12
-
 void* base = NULL;
-
-struct s_block {
-    size_t size;
-    t_block next;
-    t_block prev;
-    int free;
-    void* ptr;
-    char data[1];
-};
 
 t_block get_block(void* p) {
     char* tmp;
