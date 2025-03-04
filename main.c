@@ -6,7 +6,7 @@ typedef struct s_block* t_block;
 
 #define align4(x) (((((x) - 1) >> 2) << 2) + 4)
 
-#define BLOCK_SIZE sizeof(struct s_block)
+#define BLOCK_SIZE 12
 
 void* base = NULL;
 
@@ -94,6 +94,19 @@ void* true_malloc(size_t size) {
         base = b;
     }
     return (b->data);
+}
+
+void* calloc(size_t number, size_t size) {
+    size_t* new;
+    size_t s4, i;
+    new = malloc(number * size);
+    if (new) {
+        s4 = align4(number * size) << 2;
+        for (int i = 0; i < s4; i++) {
+            new[i] = 0;
+        }
+    }
+    return (new);
 }
 
 int main() {
